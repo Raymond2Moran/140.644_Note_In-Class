@@ -2,7 +2,7 @@
 \usepackage{graphicx} % Required for inserting images
 \usepackage[margin=0.75in]{geometry}
 \usepackage{xcolor}
-\title{140.644 Note -- In Class}
+\title{PH.140.644 Note -- In Class}
 \author{Moran Guo}
 \date{August 2024}
 
@@ -11,7 +11,7 @@
 \maketitle
 
 \section{Aug 29th}
-
+\subsection{Linear Model}
 Consider a linear model: $$\hat{f}(X) = \hat{\beta}_0 + \hat{\beta}_1 X + \hat{\beta}_2 X + \hat{\beta}_3 X + \hat{\beta}_4 X + \hat{\beta}_5 X$$
 
 How do we simplify it?\\
@@ -111,5 +111,106 @@ The $K=1$ KNN estimate gives too much complexity which can be observed from the 
 \end{figure}
 
 The training errors goes down as $K$ increases. However, the testing errors generally obey an U-shaped curve. We can see that $K=10$ is optimal here.
+
+\section{Sep 3rd}
+
+\subsection{Linear Regression}
+
+Linear regression is a simple approach to supervised learning. It assumes that the dependence of $Y$ on $X_1, X_2, \dots, X_p$.\\
+
+\noindent \textbf{Variable Selection}\\
+
+Strategy 1:
+Try one variable at a time, and calculate the training error.\\
+
+For multiple variables, we consider \textit{all subsets} of the variables to select the \textbf{best} \textit{subset} of the combination of variables. However, there are too much $(2^p)$ of combinations, so it is not realistic.\\
+
+So we need an automated approach that searches through a subset of them. (Refer to book pp. 79)
+
+\subsection{Classification}
+
+Qualitative variables in an unordered set $\mathcal{C}$, e.g., eye color, email, etc.\\
+
+Given: feature vector $X$ and qualitative response $Y$ taking values from $\mathcal{C}$, classification is to:\\
+
+Build a function $C(X)$ s.t. takes feature vector $X$ as input and output predicted $Y$.
+
+\newpage
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.75\linewidth]{Classification_income_vs_balance.png}
+    \label{fig:income-vs-balance}
+\end{figure}
+
+Clients that have a high balance are associated with higher chance (observed) of default, compared to those with a low balance.\\
+
+Can we perform a simple linear regression to predict a binary outcome?
+E.g., perform a regression of $Y$ on $X$ and classify as ``Yes'' (or ``No'') if $\hat{Y} > 0.5$? -- Yes we can.\\
+
+However, linear regression does not provide meaningful estimates of $\mathrm{Pr}(Y \vert X)$, compared to logistic regression.
+
+\subsection{Logistic Regression}
+
+$p(X) = \mathrm{Pr}(Y = 1 \vert X)$, consider using $\color{red}{balance}$ to predict $\color{red}{default}$. Logistic regression uses $$p(X) = \frac{e^{\beta_0 + \beta_1 x}}{1 + e^{\beta_0 + \beta_1 x}} \Longrightarrow \frac{p(X)}{1-p(X)} = e^{\beta_0 + \beta_1 x}.$$
+
+$\displaystyle \frac{p(X)}{1 - p(X)}$ is called \textbf{odds}.\\
+
+We uses Maximum Likelihoods to estimate the parameters:
+
+$$\displaystyle\ell(\beta_0, \beta_1) = \prod_{i:y_i = 1}p(x_i)\prod_{i:y_i = 0}\Big(1 - p(x_i)\Big)$$
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.75\linewidth]{GLM_result.png}
+    \label{GLM-logistic}
+\end{figure}
+
+We can start to make a prediction now. From the table above we get $\hat{\beta}_0 = -10.6513$ and $\hat{\beta}_1 = 0.0055$. So 
+
+\newpage
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\linewidth]{calculation_logistic.png}
+    \label{calculation-logistic}
+\end{figure}
+
+with a balance of $\$1000$.
+
+\subsection{Confounding}
+
+\subsection{Multiple Logistic Regression}
+
+$$\mathrm{Pr}(Y = k \vert X = x) = \frac{e^{\beta_{k0} + \beta_{k1} + \dots + \beta_{kp}x_p}}{1 + \sum_{l=1}^{K=1}e^{\beta_{l0} + \beta_{l1x_1} + \dots + \beta_{lp x_p}}}$$
+
+To predict the most likely class for multiple classes.
+
+\subsection{Discriminant Analysis}
+
+The approach is to model the distribution of $X$ in each of the class separately, then uses $\color{green}{\mathrm{Bayes \ Theorem}}$ to obtain $\mathrm{Pr}(Y \vert X)$.
+
+$$\mathrm{Pr}(Y = k \vert X = x) = \frac{\mathrm{Pr}(X = x \ \vert\ Y = k) \cdot \mathrm{Pr}(Y = k)}{\mathrm{Pr}(X = x)}$$
+
+Note that the denominator is \textbf{not dependent on} $k$.\\
+
+For discriminant analysis we write 
+$$\mathrm{Pr}(Y = k \vert X = x) = \frac{\pi_k f_k(x)}{\sum_{l=1}^K \pi_l f_l(x)}$$
+
+Why discriminant analysis?\\
+
+The logistic regression model are \textbf{unstable when the classes are well-separated}. Linear discriminant analysis does not suffer from this problem.\\
+
+If $n$ is small and the distribution of the predictors $X$ is approx. normal in every classes, then the linear discriminant model is more stable than the logistic regression model.\\
+
+Also, it is popular when we have more than two response classes.\\
+
+\textbf{Linear Discriminant Analysis when $p = 1$}
+
+From Gaussian density, $$f_k(x) = \frac{1}{\sqrt{2\pi}\sigma_k}e^{-\frac{1}{2}\Big(\frac{x - \mu_k}{\sigma_k}\Big)^2}$$
+
+We assume that all the $\sigma_1 = \sigma_2 = \dots = \sigma_k$.
+
+Then we find that $$p_k(x) = \frac{\pi_k \frac{1}{\sqrt{2\pi}\sigma}e^{\Big(- \frac{1}{2\sigma^2}(x - \mu_k)^2\Big)}}{\sum_{l=1}^K \pi_l \frac{1}{\sqrt{2\pi}\sigma}e^{\Big(- \frac{1}{2\sigma^2}(x - \mu_l)^2\Big)}}$$
 
 \end{document}
