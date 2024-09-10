@@ -2,6 +2,7 @@
 \usepackage{graphicx} % Required for inserting images
 \usepackage[margin=0.75in]{geometry}
 \usepackage{xcolor}
+\usepackage{amsmath}
 \title{PH.140.644 Note -- In Class}
 \author{Moran Guo}
 \date{August 2024}
@@ -302,4 +303,63 @@ There is always a trade-off between reducing false negative and false positive r
 
 ROC curve allows for plotting false positive and true positive rates on the same plot and thus allows us to determine a \textit{threshold}. Sometimes we use \textit{AUC} (area under the curve) to evaluate the performance of the model, with the higher \textit{AUC} the better the performance.
 
+\section{Sep 10th}
+\subsection{Other forms of Discriminant Analysis}
+
+\textbf{Quadratic Discriminant Analysis}: assumes that each class has its own covariance matrix. It assumes that an observation from the \textit{k}th class is of the form $X \sim N(\mu_k, \boldsymbol{\Sigma}_k)$. So we have the Bayes classifier assigns an observation $X = x$ such that 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.75\linewidth]{QDA.png}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{QDA_fig.png}
+\end{figure}
+
+QDA performs better when the Bayes decision boundary is non-linear.\\
+
+\noindent\textbf{Naive Bayes}: with $\displaystyle f_k(x) = \prod_{j=1}^p f_{jk}(x_j)$ (conditional independence model) in each class we have naive Bayes. Assumes features are independent in each class. Useful when \textit{p} is large. Gaussian Naive Bayes assumes each $\boldsymbol{\Sigma}_k$ is diagonal:
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.75\linewidth]{Naive_bayes.png}
+\end{figure}
+
+Can be used for mixed feature vectors, like a mix of qualitative and quantitative. For qualitative, replace $f_{kj}(x_j)$ with probability mass function.
+
+\subsection{Linear Regression vs. LDA}
+
+For a two class problem, we can trivially show that $$
+\log\Big(\frac{p_1(x)}{1 - p_1(x)}\Big) = \log\Big(\frac{p_1(x)}{p_2(x)}\Big) = c_0 + c_1 x_1 + \dots + c_p x_p$$
+
+So two-class LDA and logistic regression have the same form. Difference resides in the way that parameters are estimated:
+
+\begin{itemize}
+    \item Logistic regression uses the conditional likelihood based on $\mathrm{Pr}(Y \vert X)$, or discriminative learning.
+    \item LDA uses the full likelihood based on $\mathrm{Pr}(X, Y)$, or generative learning.
+    
+\end{itemize}
+
+\section{Cross-Validation \& Bootstrap (Resampling)}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{Error_vs_complexity.png}
+\end{figure}
+
+As the model complexity increase, the training sample error generally goes down, but the testing sample error is U shape, thus underfitting or overfitting may negatively affect (increase) the error on the testing data.\\
+
+Here, we consider a class of method that estimate the test error by \textit{holding out} a subset of the training observation from the fitting process.
+
+\subsection{Validation set approach}
+
+We randomly divide the available set of samples into a \textit{training set} and a \textit{validation set}. The model is fitted on the training set, and the fitted model is used to predict the responses for the observation in the validation set.
+
+\subsection{\textit{K}-fold CV}
+
+A \textit{widely used approach} for estimating test error.\\
+
+Idea is to randomly divide the data into \textit{K} equal-sized parts (E.g., $K = 10$ or $K = 5$), then assign one part as validation set, the rest as train set. This process is repeated for exactly $K$ times.
+
+Denote the $K$ parts by $C_1, C_2, \dots, C_K$, then we can compute $$\mathrm{CV}_{(K)} = \sum_{k=1}^K \frac{n_K}{n}\mathrm{MSE}_k$$ where $\displaystyle \mathrm{MSE}_k = \sum_{i\in C_k}\frac{(y_i - \hat{y}_i)^2}{n_k}$, and $\hat{y}_i$ is the fit for observation $i$. Setting $K = n$ yields $n$-fold or leave-one-out CV.
 \end{document}
