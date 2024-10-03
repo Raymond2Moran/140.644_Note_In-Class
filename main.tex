@@ -362,4 +362,122 @@ A \textit{widely used approach} for estimating test error.\\
 Idea is to randomly divide the data into \textit{K} equal-sized parts (E.g., $K = 10$ or $K = 5$), then assign one part as validation set, the rest as train set. This process is repeated for exactly $K$ times.
 
 Denote the $K$ parts by $C_1, C_2, \dots, C_K$, then we can compute $$\mathrm{CV}_{(K)} = \sum_{k=1}^K \frac{n_K}{n}\mathrm{MSE}_k$$ where $\displaystyle \mathrm{MSE}_k = \sum_{i\in C_k}\frac{(y_i - \hat{y}_i)^2}{n_k}$, and $\hat{y}_i$ is the fit for observation $i$. Setting $K = n$ yields $n$-fold or leave-one-out CV.
+
+
+\section{Sep 12th}
+
+$K$-fold CV is not repeated. We only execute it for one time. Since sets are assigned randomly, to account for the randomness, we need to execute this process for multiple times (E.g., Monte Carlo, Repeated $K$-fold CV, etc.).
+
+\subsection{CV for Classification}
+
+$$\mathrm{CV}_k = \sum_{k=1}^K \frac{n_k}{n} \mathrm{Err}_k, \text{ where } \mathrm{Err}_k = \sum_{i \in C_k} I(y_i \neq \hat{y}_i)/n_k. $$
+
+Estimated standard deviation $\displaystyle \mathrm{\widehat{SE}}(\mathrm{CV}_K) = \sqrt{\sum_{k=1}^K (\mathrm{Err}_k - \overline{\mathrm{Err}_k})^2/(K-1)}.$
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.90\linewidth]{exmaple_case.png}
+\end{figure}
+
+What is the correct way? Step 1 already exposes the data, or the procedure has already seen the labels of the training data. It is \textbf{wrong} to apply CV in step 2 only. The correct way is to apply CV to both step 1 \& 2. CV need to be applied to both training and test set, well before doing anything else.
+
+For bootstrapping multiple times, 
+
+\subsection{Bootstrap}
+
+Used to quantify the uncertainty associated with a given estimator.\\
+
+How bootstrap works?\\
+
+E.g. 
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{bootstrap.png}
+\end{figure}
+
+Bootstrap is \textbf{sampling with replacement.} For a small sample size containing $n = 3$ observations, each bootstrap data set contains $n$ observations (sampled with replacement). Each bootstrapped data set gives an estimate of $\alpha$. We denote these $\alpha$'s as $\hat{\alpha}^{*1}, \hat{\alpha}^{*2}, \dots, \hat{\alpha}^{*B}.$ We estimate the standard error of the bootstrapped data set by $$
+\mathrm{S E}_{B} ( \hat{\alpha} )=\sqrt{\frac{1} {B-1} \sum_{r=1}^{B} \left( \hat{\alpha}^{* r}-\bar{\hat{\alpha}}^{*} \right)^{2}}. 
+$$
+
+This serves as an estimate of the standard error of $\hat{\alpha}$ estimated from the original data set. Bootstrap has some drawbacks, like it cannot be used to analyze time series data.\\
+
+\noindent \textbf{Can the bootstrap estimate prediction error?}
+\\
+
+In CV, each of the $K$ validation folds is distinct (\textbf{no overlap}) used for training. But bootstrap data must and will have a significant overlap (about 2/3) of the data. This causes it to seriously underestimate the true prediction error.
+
+\subsection{More general non-linear models}
+
+\textbf{Subset selection}\\
+
+How to decide what is the best? Let $\mathcal{M}_0$ denote the null model, which contains no predictors. This model simply predicts the sample mean for each observation.\\
+
+For $k = 1, 2, \dots, p:$\\
+(a) Fit all $p \choose k$ models that contain exactly $k$ predictors.\\
+(b) Pick the best among these $p \choose k$ models, and call it $\mathcal{M}_k$.\\
+
+\noindent \textbf{Stepwise selection}\\
+
+For computational reasons, best subset selection cannot be applied to very large $p$. So stepwise methods, which explore a far more restricted set of models, are attractive alternatives to best subset selection.\\
+
+Again, $\mathcal{M}_0$ denotes the null model. For $k = 1, 2, \dots, p-1$:\\
+(a) Consider all $p-k$ models that augment the predictors in $\mathcal{M}_k$ with one additional predictor.\\
+(b) Choose the \textbf{best} among these $p-k$ models, and call it $\mathcal{M}_{k+1}$. Best is defined as having smallest RSS or highest $R^2$.
+
+\section{Oct 4th}
+
+\subsection{Bagging}
+
+A general purpose procedure for reducing the variance of a statistical learning method. Particular useful in the context of decision trees.\\
+
+We know that averaging a set of independent observations reduces variance $\sigma^2 \longrightarrow \sigma^2/n$. In reality, the dataset cannot be fully independent, we can bootstrap, by taking repeated samples from the (single) training data set.\\
+
+\subsection{Random Forest}
+
+Improvement over bagged trees by \textit{decorrelating} the tree. This reduces the variance when we average the trees.\\
+
+We use the same step in bagging by building the decision trees on bootstrapped samples, but when building these trees, each time a split in a tree is considered, \textbf{a random selection of $m$ predictors} is chosen from the full set of predictors. \\
+
+For each split, we are using a fresh selection of $m$ predictors, and typically we choose $m \approx \sqrt{p}$.
+
+\subsection{Boosting Algorithm}
+
+\begin{enumerate}
+    \item  Set $\hat{f}(x) = 0$, $r_i = y_i, \forall i$.
+    \item For $b = 1, 2, ..., B$ , repeat:
+    \begin{enumerate}
+        \item Fit a tree $\hat{f}^b$ with $d$ splits ($d + 1$ term. nodes) to the train data $(X, r)$.
+        \item Update $\hat{f}$ by adding in a shrunken version of the new tree: \[\hat{f}(x) \leftarrow \hat{f}(x) + \lambda \hat{f}^b(x).\]
+        \item Update the residuals: \[r_i \leftarrow r_i - \lambda \hat{f}^b(x_i).\]
+    \end{enumerate}
+\item Output the boosted model, \[\hat{f}(x) = \sum_{b=1}^B \lambda \hat{f}^b (x).\]
+\end{enumerate}
+
+Tuning parameters for boosting:
+
+\begin{enumerate}
+    \item Number of trees $B$. Can overfit as $|B| \rightarrow \infty$.
+    \item Shrinkage parameter $\lambda$. As $\lambda \rightarrow 0$, it necessitates a large $B$ to achieve good performance of the model.
+    \item Number of splits in each tree $d$.
+\end{enumerate}
+
+\subsection{Support Vector Machine (SVM)}
+
+Gist: we try to find a plane to best separate the classes in the feature space.
+
+In general case, the equation for a hyperplane has the form \[\beta_0 + \beta_1X_1 + \beta_2X_2 + \dots + \beta_pX_p = 0\]
+
+The vector $\boldsymbol{\beta} = (\beta_1, \beta_2, \dots, \beta_p)$ is called the normal vector, such that it points in a direction orthogonal to the hyperplane.\\
+
+If we have multiple separating hyperplane, which one should we choose? \textbf{We find the one that makes the biggest gap or margin between the two classes.} \\
+
+We define the following maximize margin classifier: $$\mathrm{maximize}_{\beta_1, \beta_2, \dots, \beta_p} \text{ subject to } \sum_{j=1}^p \beta_j^2 =1, y_i(\beta_0 + \beta_1 x_{i1} + \dots + \beta_p x_{ip}) \geq M \quad \forall i = 1, \dots, N.
+$$
+
+A lot of time, perfect separation is not possible. We define a \textit{soft margin} of the classifier such that 
+$$\mathrm{maximize}_{\beta_1, \beta_2, \dots, \beta_p, \epsilon_1, \epsilon_2, \dots, \epsilon_n} \text{ subject to } \sum_{j=1}^p \beta_j^2 =1, y_i(\beta_0 + \beta_1 x_{i1} + \dots + \beta_p x_{ip}) \geq M (1 - \epsilon_i) \quad  \epsilon_i \geq 0, \sum_{i=1}^n \epsilon_i \leq C, \forall i = 1, \dots, N.
+$$
+
+If sometimes linear boundaries failed to separate the data, we consider feature expansion and use transformations of the variables, such as $X_1^2, X_1^3, X_1X_2, \dots$
 \end{document}
