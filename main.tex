@@ -480,4 +480,85 @@ $$\mathrm{maximize}_{\beta_1, \beta_2, \dots, \beta_p, \epsilon_1, \epsilon_2, \
 $$
 
 If sometimes linear boundaries failed to separate the data, we consider feature expansion and use transformations of the variables, such as $X_1^2, X_1^3, X_1X_2, \dots$
+
+\section{Oct 8th}
+
+\subsection{Deep Learning}
+
+\textbf{Single Layer Neural Networks}:\\
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.75\linewidth]{SLNN.png}
+\end{figure}
+Input Layer, Hidden Layer, Output Layer, one for each.\\
+
+\textbf{Feed forward}: \\
+Start from input layers (features), then apply \textbf{activation functions} within each neurons, and then \textbf{feed it further}.\\
+
+For the output layer, a final function $f(X)$ is applied to all of the values of hidden units (neurons) that are fed to the output layer.\\
+
+Some activation functions: \\
+\begin{enumerate}
+    \item Sigmoid function: (also known as logit function)\\
+    \[\displaystyle g(z) = \frac{1}{1 + e^{-z}}\]\\
+
+    \item ReLU function: (easier for computer since binary cases)\\
+
+    \[g(z) = (z)_+ = \begin{cases}
+        0 & \text{if } z < 0\\
+        z & \text{otherwise}
+    \end{cases}\]
+\end{enumerate}
+
+\textbf{Non-linearity} of $\boldsymbol{g(z)}$ is essential.\\
+
+
+\textbf{Multilayer Neural Networks} (\texttt{MNIST} dataset):
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.75\linewidth]{MLNN.png}
+\end{figure}
+
+A fully connected dataset, with the dimension from features $(X)$ feed to the first layer via weight matrix $W_1 = 785 \times 256$ parameters; and from the first to the second layer via weight matrix $W_2 = 257 \times 128$ parameters. (add $1$ to account for the \textit{bias} or \textit{intercept} term)\\
+
+Since we want to have class probabilities, we use \textit{softmax activation function}:\\
+\[f_m(X) = P(Y = m | X) = \frac{e^{Z_m}}{\sum_{\ell = 0}^9 e^{Z_\ell}}.\]
+
+$10$ numbers, with each has a non-negative possibility, and all of them sum up to $1$.\\
+
+Estimated via minimization of the negative multinomial log-likelihood:\\
+\[-\sum_{i=1}^n\sum_{m=0}^9 y_{im}\log\big(f_m(x_i)\big)\]
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.75\linewidth]{strategies.png}
+\end{figure}
+
+\textbf{What is Dropout?}\\
+
+In essence, silence some nodes randomly.\\
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.75\linewidth]{Drouput.png}
+\end{figure}
+
+\textbf{Convolution Neural Networks}: (CNN)\\
+
+Utilizes convolution filters to create extra features from the images. Way better than non-CNN methods for image classification tasks.
+
+\newpage 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.75\linewidth]{logistic_CNN.png}
+\end{figure}
+
+Convolution filter:\\
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.75\linewidth]{Convolution.png}
+\end{figure}
+
 \end{document}
